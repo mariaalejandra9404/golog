@@ -151,7 +151,7 @@ func (r *TermReader) ResetOperatorTable() {
 	r.Op(700, xfx, `=..`)
 	r.Op(700, xfx, `is`, `=:=`, `=\=`, `<`, `=<`, `>`, `>=`)
 	r.Op(500, yfx, `+`, `-`, `/\`, `\/`) // syntax highlighter `
-	r.Op(400, yfx, `*`, `/`, `//`, `rem`, `mod`, `<<`, `<<`)
+	r.Op(400, yfx, `*`, `/`, `//`, `rem`, `mod`, `<<`, `<<`, `rnd`,`int`, `approach`)
 	r.Op(200, xfx, `**`)
 	r.Op(200, xfy, `^`)
 	r.Op(200, fy, `-`, `\`) // syntax highlighter `
