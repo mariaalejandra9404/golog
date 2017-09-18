@@ -1,9 +1,10 @@
 package term
 
 import "fmt"
+import "math"
 import "math/big"
 import . "github.com/mndrix/golog/util"
-
+import "strconv"
 // Number represents either an integer or a floating point number.  This
 // interface is convenient when working with arithmetic
 type Number interface {
@@ -85,6 +86,13 @@ func ArithmeticEval(t0 Term) (Number, error) {
 			return ArithmeticMinus(a, b)
 		case "/": // division
 			return ArithmeticDivide(a, b)
+		case "rnd": // round number
+			return ArithmeticModule(a, b)
+		case "int": // round number
+				return ArithmeticInt(a)
+		case "approach":
+			 return Approach(a, b)
+
 		}
 
 	}
@@ -234,3 +242,71 @@ func NumberCmp(a, b Number) int {
 	}
 	return 0
 }
+// Subtract two Golog numbers returning the result as a new Golog number
+func ArithmeticModule(a, b Number) (Number, error) {
+
+	// as integers?
+	if xi, ok := a.LosslessInt(); ok {
+		if yi, ok := b.LosslessInt(); ok {
+			r := new(big.Int).Sub(xi, yi)
+			//fmt.Println(r)
+			return NewBigInt(r), nil
+		}
+	}
+
+
+	x := a.Float64()
+	if math.IsNaN(x) || math.IsInf(x, 0) {
+		return NewFloat64(a.Float64()),nil
+	}
+
+	/*sign := 1.0
+	if x < 0 {
+		sign = -1
+		x *= -1
+	}*/
+
+	var rounder float64
+	pow := math.Pow(10, b.Float64())
+	intermed := x * pow
+	_, frac := math.Modf(intermed)
+
+	if frac >= 0.5 {
+		rounder = math.Ceil(intermed)
+	} else {
+		rounder = math.Floor(intermed)
+	}
+	// as floats?
+	r := rounder / pow  //math.Mod(a.Float64() , b.Float64())
+	return NewFloat64(r), nil
+}
+
+func ArithmeticInt(a Number) (Number, error) {
+
+	x := a.Float64()
+	integer := strconv.Itoa(int(x))
+	fmt.Println("prueba")
+	fmt.Println(integer)
+	return NewInt(integer), nil
+
+}
+
+/* Aproxima un número
+* a es el número a aproximar
+* b es multiplo para la aproximación
+ */
+func Approach(a, b Number) (Number, error) {
+	x := a.Float64() / b.Float64()
+	y := math.Trunc(x)
+	//y := math.Trunc(x)
+	var numero Number
+	if (x - y) > 0 {
+		numero, _ = Approach(NewFloat(strconv.FormatFloat(math.Trunc(a.Float64())+1, 'E', -1, 64)), b)
+		
+	} else {
+		numero = a
+	}
+	//strconv.FormatFloat((a.Float64()+1), 'E', -1, 64))
+	return numero, nil
+}
+
